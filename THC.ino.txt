@@ -5,9 +5,9 @@
 		LimitDown
 		zDir
 		zPuls
-		Up
-		Down
-		Arc
+		THCUp
+		THCDown
+		THCArc
 		SpindleEnable
 	
 	O:	PauseProgramm
@@ -19,6 +19,8 @@
 		countSteps
 		iStep
 		
+		TIMER_PROGRAMMIEREN!!!
+		
 		
 
 
@@ -26,10 +28,31 @@
 				moveUp();
 				moveDown();
 
+//digitalRead
+
+NH				 = NOT digitalRead(Pinx);
+LimitDown		 = NOT digitalRead(Pinx);
+zDir 			 = NOT digitalRead(Pinx);
+zPuls			 = NOT digitalRead(Pinx);
+THCUp			 = NOT digitalRead(Pinx);
+THCDown			 = NOT digitalRead(Pinx);
+THCArc			 = NOT digitalRead(Pinx);
+SpindleEnable	 = NOT digitalRead(Pinx);
 
 
-				
+
+//IF NH, THEN Ausgaenge aus, PauseProgramm (1s Impuls)
+
+IF NH {
+	digitalWrite(...., LOW);
+	
+}
+
+ELSE {
+					
 //Schrittkette THC
+	
+	IF 
 
 //Startsignal dann Schrittkette start, sonst disable move, Plasma aus
 
@@ -48,4 +71,6 @@
 //LOOP moveUp(),moveDown()
 
 
-//IF NH, THEN NOT ArcEnable, PauseProgramm (1s Impuls)
+
+
+
