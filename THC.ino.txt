@@ -1,1 +1,51 @@
 // THC Moritz Rehberg 26.04.2018
+
+/*Variablen:
+	I:	NH
+		LimitDown
+		zDir
+		zPuls
+		Up
+		Down
+		Arc
+		SpindleEnable
+	
+	O:	PauseProgramm
+		ArcEnable
+		zDir
+		zPuls
+		
+	_Var:
+		countSteps
+		iStep
+		
+		
+
+
+/*Funktionen:
+				moveUp();
+				moveDown();
+
+
+
+				
+//Schrittkette THC
+
+//Startsignal dann Schrittkette start, sonst disable move, Plasma aus
+
+//Programm pause
+
+//Antasten
+
+//Freifahren
+
+//Start Lichtbogen
+
+//Einstechen
+
+//End Programm Pause
+
+//LOOP moveUp(),moveDown()
+
+
+//IF NH, THEN NOT ArcEnable, PauseProgramm (1s Impuls)
