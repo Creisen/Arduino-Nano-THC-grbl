@@ -32,11 +32,13 @@ Variablen:
 
 	_Var:
 
-		countSteps
+		int countSteps = 0;
 
-		iStep
+		int iStep = 0;
 
-		iVelo //mm/min
+		int iVelo = 0;	//mm/min
+		
+		int iDistRelease = 0;	//mm
 		
 
 		TIMER_PROGRAMMIEREN!!!
@@ -52,7 +54,7 @@ Variablen:
 /*
 Funktionen:
 
-				moveUp();
+				moveUp();	// per call 1 Step
 
 				moveDown();
 
@@ -126,6 +128,7 @@ Case [iStep]
 
 1:		digitalWrite(PauseProgramm, HIGH);
 
+		iStep = 2;
 
 //Antasten
 
@@ -134,18 +137,31 @@ Case [iStep]
 		moveDown(iVelo);
 		}	
 
+		iStep = 3;
+		
 //Freifahren
 		
+3:		iDistRelease
 		
+		for(...)	{
+		
+			moveUp();
+			
+			iCountStepZ ++;
+			
+		}
 
-
+		iStep = 4;
+		
 //Start Lichtbogen
 
+4:		digitalWrite(ArcEnable, HIGH);
 
-
+		iStep = 5;
+		
 //Einstechen
 
-
+5:		
 
 //End Programm Pause
 
