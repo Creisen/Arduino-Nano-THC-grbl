@@ -31,10 +31,12 @@ Variablen:
 
 	//_Var:
 
-		int countSteps = 0;
+		int icountSteps = 0;
 		int iStep = 0;
 		int iVelo = 0;	//mm/min
-		int iDistRelease = 0;	//mm
+		int iDistRelease = 0;	//mm Freifahren
+                int iDistPlunge = 0;    //mm Einstechtiefe
+                int iReleaseCurrent = 0;
 
 		
 }
@@ -45,6 +47,8 @@ Variablen:
 
 void Loop{
 
+  //int!!
+  
 NH			 = NOT digitalRead(3);
 LimitDown		 = NOT digitalRead(4);
 zDir 			 = NOT digitalRead(5);
@@ -53,7 +57,6 @@ THCUp			 = NOT digitalRead(7);
 THCDown			 = NOT digitalRead(8);
 THCArc			 = NOT digitalRead(9);
 SpindleEnable	         = NOT digitalRead(10);
-
 
 
 
@@ -99,9 +102,11 @@ switch(iStep){
 
 //Startsignal dann Schrittkette start, sonst disable move, Plasma aus
 
-case 0:		//Alle ausgänge aus
-
-
+case 0:		                                    //Alle ausgänge aus
+                digitalWrite(PauseProgram, LOW);
+	        digitalWrite(ArcEnable, LOW);       
+                
+                iStep = 1;
 
 case 1:		                                    //Programm pause
                 digitalWrite(PauseProgram, HIGH);   
@@ -111,24 +116,30 @@ case 1:		                                    //Programm pause
 
 
 case 2:		                                    //Antasten    
-                while(NOT LimitDown){      
+                if(!LimitDown){      
 	
-		moveDown(iVelo);
-		}	
-
-		iStep = 3;
+		  moveDown(iVelo);
 		
+                  break;
+                
+                }
 
+
+		else {
+
+                  iStep = 3;
+              
+                }
+                
 		
 case 3:		                                    //Freifahren
                 iDistRelease
 		
-		for(...)	{
+		while(iDistRelease =< iReleasaCurrent)	{
 		
-			moveUp();
+			iReleaseCurrent = moveUp();
 			
-			iCountStepZ ++;
-			
+			break;
 		}
 
 		iStep = 4;
@@ -142,6 +153,7 @@ case 4:		                                     //Start Lichtbogen
 		  iStep = 5;
 		}
 
+                break;
 
 case 5:		                                    //Einstechen
 
@@ -161,12 +173,16 @@ case 7:                                             //LOOP moveUp(),moveDown()
                  
                 moveUp(); 
                 
+                break;
+                
                }
                
                else if (THCDown){
                  
                 moveDown();
                
+                break;
+                
                }
 
 
@@ -178,25 +194,44 @@ case 7:                                             //LOOP moveUp(),moveDown()
 
 
 
-int moveDown(int PinDir, int PinStep){
-  boolean Dir = 0;
+int moveDown(int PinDir, int PinStep, boolean Reset){
+  digitalWrite(PinDir, LOW);
+  
   boolean Step;
+  
+  digitalWrite(PinStep, Step);
   
   Step =! Step;
   
-  return Step;
+  int iCount ++;
+  
+  if (Reset){
+    iCount = 0;
+  }
+  
+  return iCount;
   
 }
 
-int moveUp(int PinDir, int PinStep){
-  boolean Dir = 1;
+int moveUp(int PinDir, int PinStep, boolean Reset){
+  digitalWrite(PinDir, HIGH);
+  
   boolean Step;
   
-   Step =! Step;
+  digitalWrite(PinStep, Step);
   
-  return Step;
+  Step =! Step;
+  
+  int iCount ++;
+  
+  if (Reset){
+    iCount = 0;
+  }
+  
+  return iCount;
   
 }
+
 
 
 boolean TON(int TimeValueMS, boolean IN){
