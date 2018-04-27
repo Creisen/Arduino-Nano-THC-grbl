@@ -2,83 +2,57 @@
 
 
 
+
+
+
+void Setup(){
+
 /*
 Variablen:
 
 	I:	NH
-
 		LimitDown
-
 		zDir
-
 		zPuls
-
 		THCUp
-
 		THCDown
-
 		THCArc
-
 		SpindleEnable
 
-	
+*/	
 
-	O: 	int PauseProgramm	= #PINNUMMER
-		int ArcEnable       = #PINNUMMER
-		int zDir            = #PINNUMMER
-		int zPuls           = #PINNUMMER
+	//O:
+        	int PauseProgramm   = 11;
+		int ArcEnable       = 12;
+		int zDir            = 13;
+		int zPuls           = A0;
 
 		
 
-	_Var:
+	//_Var:
 
 		int countSteps = 0;
-
 		int iStep = 0;
-
 		int iVelo = 0;	//mm/min
-		
 		int iDistRelease = 0;	//mm
-		
-
-		TIMER_PROGRAMMIEREN!!!
 
 		
-*/
-		
+}
 
-
-
-
-
-/*
-Funktionen:
-
-				moveUp();	// per call 1 Step
-
-				moveDown();
-
-*/
 
 //digitalRead
 
 
+void Loop{
 
-NH			 = NOT digitalRead(Pinx);
-
-LimitDown		 = NOT digitalRead(Pinx);
-
-zDir 			 = NOT digitalRead(Pinx);
-
-zPuls			 = NOT digitalRead(Pinx);
-
-THCUp			 = NOT digitalRead(Pinx);
-
-THCDown			 = NOT digitalRead(Pinx);
-
-THCArc			 = NOT digitalRead(Pinx);
-
-SpindleEnable	         = NOT digitalRead(Pinx);
+NH			 = NOT digitalRead(3);
+LimitDown		 = NOT digitalRead(4);
+zDir 			 = NOT digitalRead(5);
+zPuls			 = NOT digitalRead(6);
+THCUp			 = NOT digitalRead(7);
+THCDown			 = NOT digitalRead(8);
+THCArc			 = NOT digitalRead(9);
+SpindleEnable	         = NOT digitalRead(10);
 
 
 
@@ -90,17 +64,15 @@ SpindleEnable	         = NOT digitalRead(Pinx);
 
 
 
-IF NH {
+if (NH) {
 
-	digitalWrite(...., LOW);
-
-	
-
+	digitalWrite(PauseProgram, LOW);
+	digitalWrite(ArcEnable, LOW);
 }
 
 
 
-ELSE {
+else   {
 
 					
 
@@ -108,15 +80,20 @@ ELSE {
 
 	
 
-	IF	SpindleEnable && NOT iStep {
+	if (SpindleEnable && iStep == 0 && NOT NH) {
 
 		iStep = 1; 		// initial, wenn schrittkette auf 0
 		
 	}
 	
-	Elsif NOT SpindleEnable {
+	else if NOT SpindleEnable {
+  
 		iStep = 0;
+                digitalWrite(ArcEnable, LOW);
+
 	}
+
+
 
 switch(iStep){
 
@@ -124,24 +101,27 @@ switch(iStep){
 
 case 0:		//Alle ausgänge aus
 
-//Programm pause
 
-case 1:		digitalWrite(PauseProgram, HIGH);
+
+case 1:		                                    //Programm pause
+                digitalWrite(PauseProgram, HIGH);   
 
 		iStep = 2;
 
-//Antasten
 
-case 2:		while(NOT LimitDown){
+
+case 2:		                                    //Antasten    
+                while(NOT LimitDown){      
 	
 		moveDown(iVelo);
 		}	
 
 		iStep = 3;
 		
-//Freifahren
+
 		
-case 3:		iDistRelease
+case 3:		                                    //Freifahren
+                iDistRelease
 		
 		for(...)	{
 		
@@ -153,32 +133,48 @@ case 3:		iDistRelease
 
 		iStep = 4;
 		
-//Start Lichtbogen
 
-case 4:		digitalWrite(ArcEnable, HIGH);
 
-		iStep = 5;
-		
-//Einstechen
+case 4:		                                     //Start Lichtbogen
+                digitalWrite(ArcEnable, HIGH);     
+                
+                if (THCArc){          //continue when Arc is on
+		  iStep = 5;
+		}
 
-case 5:		
 
-//End Programm Pause
+case 5:		                                    //Einstechen
 
-case 6:        digitalWrite(PauseProgram, LOW);
+
+
+case 6:                                             //End Programm Pause
+               digitalWrite(PauseProgram, LOW);    
 
                iStep = 7;
 
-//LOOP moveUp(),moveDown()
 
-case 7:        if
+
+case 7:                                             //LOOP moveUp(),moveDown()
+          
+          
+               if (THCUp){
+                 
+                moveUp(); 
+                
+               }
+               
+               else if (THCDown){
+                 
+                moveDown();
+               
+               }
+
 
 }
 
 }
 
-
-//CounterStepMaster
+}
 
 
 
@@ -186,11 +182,21 @@ int moveDown(int PinDir, int PinStep){
   boolean Dir = 0;
   boolean Step;
   
+  Step =! Step;
   
+  return Step;
   
 }
 
-
+int moveUp(int PinDir, int PinStep){
+  boolean Dir = 1;
+  boolean Step;
+  
+   Step =! Step;
+  
+  return Step;
+  
+}
 
 
 boolean TON(int TimeValueMS, boolean IN){
