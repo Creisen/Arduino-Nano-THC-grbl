@@ -29,7 +29,7 @@ Variablen:
 		int iStep = 0;
 		int iVelo = 0;	//mm/min
 		int iDistRelease = 2;	//mm Freifahren
-                int iDistPlunge = 2;    //mm Einstechtiefe
+                int iDistPlunge = 100;    //mm Einstechtiefe
 		int StepsPermm = 40;	// Schrittweite
                 int iReleaseCurrent = 0;
 		boolean ReleaseReset = 0;
@@ -88,7 +88,7 @@ boolean IzPuls			 =  digitalRead(6);
 boolean THCUp			 = ! digitalRead(7);
 boolean THCDown			 = ! digitalRead(8);
 boolean THCArc			 = ! digitalRead(9);
-boolean SpindleEnable	 = ! digitalRead(10);
+boolean SpindleEnable	 =  digitalRead(10);
 
 
 
@@ -103,7 +103,7 @@ if (NH) {
         
 	digitalWrite(PauseProgram, LOW);
 	digitalWrite(ArcEnable, LOW);
-	  Serial.println("Not-Halt");
+	Serial.println("Not-Halt");
 	iStep = 0;
 }
 
@@ -128,6 +128,8 @@ else   {
                 digitalWrite(zDir, IzDir);      //Signale von grbl Durchschalten
                 digitalWrite(zPuls, IzPuls);
                 digitalWrite(ArcEnable, LOW);
+                digitalWrite(PauseProgram, LOW);
+                
 		iStep = 0;
 	}
 
@@ -139,16 +141,16 @@ switch(iStep){
 
 case 0:		                                    //Alle ausgänge aus
                 digitalWrite(PauseProgram, LOW);
-	        digitalWrite(ArcEnable, LOW);       
-                  Serial.println("Schritt 0");
+	              digitalWrite(ArcEnable, LOW);       
+                Serial.println("Schritt 0");
                 if (SpindleEnable){
                 iStep = 1;
                 }
                 break;
             
 case 1:		                                    //Programm pause
-        digitalWrite(PauseProgram, HIGH);   
-                  Serial.println("Schritt 1");
+                digitalWrite(PauseProgram, HIGH);   
+                Serial.println("Schritt 1");
                 ReleaseReset = false;  
 		iStep = 2;
 
@@ -272,7 +274,7 @@ case 7:                                             //LOOP moveUp(),moveDown()
 
 
 int moveDown(int PinDir, int PinStep){			//Funktion Z-Achse senken
-  digitalWrite(PinDir, LOW);
+  digitalWrite(PinDir, HIGH);
   
   
   delay(1);
@@ -283,10 +285,10 @@ int moveDown(int PinDir, int PinStep){			//Funktion Z-Achse senken
 }
 
 int moveUp(int PinDir, int PinStep){				//Funktion Z-Achse anheben
-  digitalWrite(PinDir, HIGH);
+  digitalWrite(PinDir, LOW);
   
 	
-  delay(100);
+  delay(1);
   
   digitalWrite(PinStep, !digitalRead(PinStep));
   
