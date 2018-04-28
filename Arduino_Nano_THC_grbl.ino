@@ -24,7 +24,7 @@ Variablen:
         int PauseProgram    = 11;
 		int ArcEnable  = 12;
 		int zDir            = 14;
-		int zPuls          = A0;
+		int ProgramResume        = 15;
 
 		
 
@@ -33,8 +33,8 @@ Variablen:
 		int icountSteps = 0;
 		int iStep = 0;
 		int iVelo = 0;	//mm/min
-		int iDistRelease = 50;	//mm Freifahren
-    int iDistPlunge = 1;    //mm Einstechtiefe
+		int iDistRelease = 10;	//mm Freifahren
+    int iDistPlunge = 10;    //mm Einstechtiefe
 		int StepsPermm = 100;	// Schrittweite
     int iReleaseCurrent = 0;
 		boolean ReleaseReset = 0;
@@ -49,7 +49,7 @@ void setup(){
 
     Serial.begin(9600);
 
-   motor.setSpeed(200); //50 rpm
+   motor.setSpeed(50); //50 rpm
 
   
 	  pinMode(3, INPUT);
@@ -73,7 +73,7 @@ void setup(){
 	  pinMode(PauseProgram, OUTPUT);
 	  pinMode(ArcEnable, OUTPUT);
 	  pinMode(zDir, OUTPUT);
-	  pinMode(zPuls, OUTPUT);
+	  pinMode(ProgramResume, OUTPUT);
 
 	  iDistRelease = iDistRelease * StepsPermm;
 	  iDistPlunge = iDistPlunge * StepsPermm;
@@ -110,7 +110,8 @@ boolean SpindleEnable	 =  digitalRead(10);
 
 if (NH) {
         
-	digitalWrite(PauseProgram, HIGH);
+	//digitalWrite(PauseProgram, HIGH);
+  digitalWrite(ProgramResume, LOW);
 	digitalWrite(ArcEnable, LOW);
 	Serial.println("Not-Halt");
 	iStep = 0;
@@ -134,10 +135,29 @@ else   {
 	
 	else if (! SpindleEnable) {
   
-                digitalWrite(zDir, IzDir);      //Signale von grbl Durchschalten
-                digitalWrite(zPuls, IzPuls);
+              if(PIND & (1 << PD5)){      //Signale von grbl Durchschalten;
+
+                 PORTC |= (1 << PC0);
+              
+              }
+    
+              else {
+                 PORTC &= (1 << PC0);            
+              }
+
+              if(PIND & (1 << PD6)){      //Signale von grbl Durchschalten;
+
+                 PORTB |= (1 << PB5);
+              
+              }
+    
+              else {
+                 PORTC &= (1 << PB5);            
+              }
+
+                
                 digitalWrite(ArcEnable, LOW);
-                digitalWrite(PauseProgram, LOW);
+          //      digitalWrite(PauseProgram, LOW);
                 
 		iStep = 0;
 	}
@@ -150,6 +170,7 @@ switch(iStep){
 
 case 0:		                                    //Alle ausgänge aus
                 digitalWrite(PauseProgram, LOW);
+                digitalWrite(ProgramResume, LOW);
 	              digitalWrite(ArcEnable, LOW);       
                 Serial.println("Schritt 0");
                 if (SpindleEnable){
@@ -158,17 +179,17 @@ case 0:		                                    //Alle ausgänge aus
                 break;
             
 case 1:		                                    //Programm pause
-                digitalWrite(PauseProgram, HIGH);   
+             //   digitalWrite(PauseProgram, HIGH);   
                 Serial.println("Schritt 1");
                 ReleaseReset = false;  
-		iStep = 2;
+		            iStep = 2;
 
 
 
 case 2:		                                    //Antasten    
                 Serial.println("Schritt 2");
 
-                digitalWrite(PauseProgram, HIGH);                 
+          //      digitalWrite(PauseProgram, LOW);                 
 
 
                 if(LimitDown){      
@@ -249,9 +270,10 @@ case 5:		                                    //Einstechen
 
 case 6:                                             //End Programm Pause
 
-                  Serial.println("Schritt 6");
+               Serial.println("Schritt 6");
 
-               digitalWrite(PauseProgram, HIGH);    
+               digitalWrite(ProgramResume, HIGH); 
+  
 
                iStep = 7;
 
@@ -264,7 +286,6 @@ case 7:                                             //LOOP moveUp(),moveDown()
                   Serial.println("Schritt 7");
 
 
-               digitalWrite(PauseProgram, LOW);   
 
                if (THCUp){
                  
@@ -297,6 +318,8 @@ case 7:                                             //LOOP moveUp(),moveDown()
 
 }
 
+
+/*
 
 
 int moveDown(int PinDir, int PinStep){			//Funktion Z-Achse senken
@@ -348,4 +371,4 @@ else {
 } 
   
 }
-
+*/
