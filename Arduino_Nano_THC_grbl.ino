@@ -1,6 +1,11 @@
 // THC Moritz Rehberg 26.04.2018
 
 
+
+#include <AFMotor.h>
+
+AF_Stepper motor(200, 1);
+
 /*
 Variablen:
 
@@ -43,6 +48,9 @@ Variablen:
 void setup(){
 
     Serial.begin(9600);
+
+   motor.setSpeed(50); //50 rpm
+
   
 	  pinMode(3, INPUT);
 	  digitalWrite(3, HIGH);	//activate pullup
@@ -80,6 +88,7 @@ void setup(){
 void   loop(){
 
   //int!!
+
   
 boolean NH				 = !digitalRead(3);
 boolean LimitDown		 = ! digitalRead(4);
@@ -159,9 +168,10 @@ case 1:		                                    //Programm pause
 case 2:		                                    //Antasten    
                 Serial.println("Schritt 2");
 
-                if(!LimitDown){      
-	
-		 		  moveDown(zDir,zPuls);
+                if(LimitDown){      
+	                                            //Motorbewegen
+                  zDir = false;
+                  motor.step(100, BACKWARD, SINGLE); 
 		
                   break;
                 
@@ -181,7 +191,9 @@ case 3:		                                    //Freifahren
 
 		if (iDistRelease >= iReleaseCurrent)	{
 		
-			moveUp(zDir,zPuls);
+                //Motor bewegen
+          zDir = true;
+          motor.step(10, FORWARD, SINGLE); 
 			
                        iReleaseCurrent++;
 
