@@ -1,12 +1,6 @@
 // THC Moritz Rehberg 26.04.2018
 
 
-
-
-
-
-void setup(){
-
 /*
 Variablen:
 
@@ -22,7 +16,7 @@ Variablen:
 */	
 
 	//O:
-        	int PauseProgramm   = 11;
+        int PauseProgram    = 11;
 		int ArcEnable       = 12;
 		int zDir            = 13;
 		int zPuls           = A0;
@@ -35,10 +29,46 @@ Variablen:
 		int iStep = 0;
 		int iVelo = 0;	//mm/min
 		int iDistRelease = 0;	//mm Freifahren
-                int iDistPlunge = 0;    //mm Einstechtiefe
-                int iReleaseCurrent = 0;
-
+        int iDistPlunge = 0;    //mm Einstechtiefe
+		int StepsPermm = 40;	// Schrittweite
+        int iReleaseCurrent = 0;
+		boolean ReleaseReset;
+		int iReleasePlunge = 0;
+		boolean PlungeReset;
 		
+
+
+
+
+void setup(){
+
+	  pinMode(3, INPUT);
+	  digitalWrite(3, HIGH);	//activate pullup
+	  pinMode(4, INPUT);
+	  digitalWrite(4, HIGH);	//activate pullup
+	  pinMode(5, INPUT);
+	  digitalWrite(5, HIGH);	//activate pullup
+	  pinMode(6, INPUT);
+	  digitalWrite(6, HIGH);	//activate pullup
+	  pinMode(7, INPUT);
+	  digitalWrite(7, HIGH);	//activate pullup
+	  pinMode(8, INPUT);
+	  digitalWrite(8, HIGH);	//activate pullup
+	  pinMode(9, INPUT);
+	  digitalWrite(9, HIGH);	//activate pullup
+	  pinMode(10, INPUT);
+	  digitalWrite(10, HIGH);	//activate pullup
+	
+	
+	  pinMode(PauseProgram, OUTPUT);
+	  pinMode(ArcEnable, OUTPUT);
+	  pinMode(zDir, OUTPUT);
+	  pinMode(zPuls, OUTPUT);
+
+	  iDistRelease = iDistRelease * StepsPermm;
+	  iDistPlunge = iDistPlunge * StepsPermm;
+	
+	
 }
 
 
@@ -49,14 +79,14 @@ void   loop(){
 
   //int!!
   
-int NH				 = ! digitalRead(3);
-int LimitDown		 = ! digitalRead(4);
-int zDir 			 = ! digitalRead(5);
-int zPuls			 = ! digitalRead(6);
-int THCUp			 = ! digitalRead(7);
-int THCDown			 = ! digitalRead(8);
-int THCArc			 = ! digitalRead(9);
-int SpindleEnable	         = ! digitalRead(10);
+boolean NH				 = ! digitalRead(3);
+boolean LimitDown		 = ! digitalRead(4);
+boolean zDir 			 = ! digitalRead(5);
+boolean zPuls			 = ! digitalRead(6);
+boolean THCUp			 = ! digitalRead(7);
+boolean THCDown			 = ! digitalRead(8);
+boolean THCArc			 = ! digitalRead(9);
+boolean SpindleEnable	 = ! digitalRead(10);
 
 
 
@@ -71,6 +101,7 @@ if (NH) {
 
 	digitalWrite(PauseProgram, LOW);
 	digitalWrite(ArcEnable, LOW);
+	iStep = 0;
 }
 
 
@@ -89,7 +120,7 @@ else   {
 		
 	}
 	
-	else if ! SpindleEnable {
+	else if (! SpindleEnable) {
   
 		iStep = 0;
                 digitalWrite(ArcEnable, LOW);
@@ -109,7 +140,7 @@ case 0:		                                    //Alle ausgänge aus
                 iStep = 1;
 
 case 1:		                                    //Programm pause
-                digitalWrite(PauseProgram, HIGH);   
+        digitalWrite(PauseProgram, HIGH);   
 
 		iStep = 2;
 
@@ -118,7 +149,7 @@ case 1:		                                    //Programm pause
 case 2:		                                    //Antasten    
                 if(!LimitDown){      
 	
-		  moveDown(iVelo);
+		 		  moveDown(zDir,zPuls, true);
 		
                   break;
                 
@@ -126,22 +157,23 @@ case 2:		                                    //Antasten
 
 
 		else {
-
+				  ReleaseReset = false;
                   iStep = 3;
               
                 }
                 
 		
 case 3:		                                    //Freifahren
-                iDistRelease
+     
 		
-		while(iDistRelease =< iReleasaCurrent)	{
+		while(iDistRelease <= iReleasaCurrent)	{
 		
-			iReleaseCurrent = moveUp();
+			iReleaseCurrent = moveUp(zDir,zPuls,ReleaseReset);
 			
 			break;
 		}
 
+		ReleaseReset = true;
 		iStep = 4;
 		
 
@@ -156,7 +188,15 @@ case 4:		                                     //Start Lichtbogen
                 break;
 
 case 5:		                                    //Einstechen
-
+		   while(! THCUp){
+			
+			 moveDown(zDir,zPuls);
+			 break;
+			   
+		   }
+		
+			iStep = 6;
+		
 
 
 case 6:                                             //End Programm Pause
@@ -171,7 +211,7 @@ case 7:                                             //LOOP moveUp(),moveDown()
           
                if (THCUp){
                  
-                moveUp(); 
+                moveUp(zDir,zPuls); 
                 
                 break;
                 
@@ -179,7 +219,7 @@ case 7:                                             //LOOP moveUp(),moveDown()
                
                else if (THCDown){
                  
-                moveDown();
+                moveDown(zDir,zPuls);
                
                 break;
                 
@@ -194,11 +234,13 @@ case 7:                                             //LOOP moveUp(),moveDown()
 
 
 
-int moveDown(int PinDir, int PinStep, boolean Reset){
+int moveDown(int PinDir, int PinStep, boolean Reset){			//Funktion Z-Achse senken
   digitalWrite(PinDir, LOW);
   
   boolean Step;
   
+  delay(1);
+	
   digitalWrite(PinStep, Step);
   
   Step =! Step;
@@ -213,10 +255,12 @@ int moveDown(int PinDir, int PinStep, boolean Reset){
   
 }
 
-int moveUp(int PinDir, int PinStep, boolean Reset){
+int moveUp(int PinDir, int PinStep, boolean Reset){				//Funktion Z-Achse anheben
   digitalWrite(PinDir, HIGH);
   
   boolean Step;
+	
+  delay(1);
   
   digitalWrite(PinStep, Step);
   
@@ -234,7 +278,7 @@ int moveUp(int PinDir, int PinStep, boolean Reset){
 
 
 
-boolean TON(int TimeValueMS, boolean IN){
+boolean TON(int TimeValueMS, boolean IN){						// Timer
  
   boolean OUT;
   
