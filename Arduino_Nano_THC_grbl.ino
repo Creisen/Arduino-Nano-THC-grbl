@@ -5,7 +5,7 @@
 
 
 
-void Setup(){
+void setup(){
 
 /*
 Variablen:
@@ -45,18 +45,18 @@ Variablen:
 //digitalRead
 
 
-void Loop{
+void   loop(){
 
   //int!!
   
-NH			 = NOT digitalRead(3);
-LimitDown		 = NOT digitalRead(4);
-zDir 			 = NOT digitalRead(5);
-zPuls			 = NOT digitalRead(6);
-THCUp			 = NOT digitalRead(7);
-THCDown			 = NOT digitalRead(8);
-THCArc			 = NOT digitalRead(9);
-SpindleEnable	         = NOT digitalRead(10);
+int NH				 = ! digitalRead(3);
+int LimitDown		 = ! digitalRead(4);
+int zDir 			 = ! digitalRead(5);
+int zPuls			 = ! digitalRead(6);
+int THCUp			 = ! digitalRead(7);
+int THCDown			 = ! digitalRead(8);
+int THCArc			 = ! digitalRead(9);
+int SpindleEnable	         = ! digitalRead(10);
 
 
 
@@ -83,13 +83,13 @@ else   {
 
 	
 
-	if (SpindleEnable && iStep == 0 && NOT NH) {
+	if (SpindleEnable && iStep == 0 && ! NH) {
 
 		iStep = 1; 		// initial, wenn schrittkette auf 0
 		
 	}
 	
-	else if NOT SpindleEnable {
+	else if ! SpindleEnable {
   
 		iStep = 0;
                 digitalWrite(ArcEnable, LOW);
@@ -257,5 +257,4 @@ else {
 } 
   
 }
-
 
