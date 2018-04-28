@@ -17,9 +17,9 @@ Variablen:
 
 	//O:
         int PauseProgram    = 11;
-		int ArcEnable       = 12;
+		int ArcEnable  = 12;
 		int zDir            = 13;
-		int zPuls           = A0;
+		int zPuls          = A0;
 
 		
 
@@ -28,11 +28,11 @@ Variablen:
 		int icountSteps = 0;
 		int iStep = 0;
 		int iVelo = 0;	//mm/min
-		int iDistRelease = 0;	//mm Freifahren
-        int iDistPlunge = 0;    //mm Einstechtiefe
+		int iDistRelease = 2;	//mm Freifahren
+                int iDistPlunge = 2;    //mm Einstechtiefe
 		int StepsPermm = 40;	// Schrittweite
-        int iReleaseCurrent = 0;
-		boolean ReleaseReset;
+                int iReleaseCurrent = 0;
+		boolean ReleaseReset = 0;
 		int iReleasePlunge = 0;
 		boolean PlungeReset;
 		
@@ -42,6 +42,8 @@ Variablen:
 
 void setup(){
 
+    Serial.begin(9600);
+  
 	  pinMode(3, INPUT);
 	  digitalWrite(3, HIGH);	//activate pullup
 	  pinMode(4, INPUT);
@@ -79,10 +81,10 @@ void   loop(){
 
   //int!!
   
-boolean NH				 = ! digitalRead(3);
+boolean NH				 = !digitalRead(3);
 boolean LimitDown		 = ! digitalRead(4);
-boolean zDir 			 = ! digitalRead(5);
-boolean zPuls			 = ! digitalRead(6);
+boolean IzDir 			 =  digitalRead(5);
+boolean IzPuls			 =  digitalRead(6);
 boolean THCUp			 = ! digitalRead(7);
 boolean THCDown			 = ! digitalRead(8);
 boolean THCArc			 = ! digitalRead(9);
@@ -98,9 +100,10 @@ boolean SpindleEnable	 = ! digitalRead(10);
 
 
 if (NH) {
-
+        
 	digitalWrite(PauseProgram, LOW);
 	digitalWrite(ArcEnable, LOW);
+	  Serial.println("Not-Halt");
 	iStep = 0;
 }
 
@@ -114,7 +117,7 @@ else   {
 
 	
 
-	if (SpindleEnable && iStep == 0 && ! NH) {
+	if (SpindleEnable && (iStep == 0) && ! NH) {
 
 		iStep = 1; 		// initial, wenn schrittkette auf 0
 		
@@ -122,9 +125,10 @@ else   {
 	
 	else if (! SpindleEnable) {
   
-		iStep = 0;
+                digitalWrite(zDir, IzDir);      //Signale von grbl Durchschalten
+                digitalWrite(zPuls, IzPuls);
                 digitalWrite(ArcEnable, LOW);
-
+		iStep = 0;
 	}
 
 
@@ -136,20 +140,26 @@ switch(iStep){
 case 0:		                                    //Alle ausgänge aus
                 digitalWrite(PauseProgram, LOW);
 	        digitalWrite(ArcEnable, LOW);       
-                
+                  Serial.println("Schritt 0");
+                if (SpindleEnable){
                 iStep = 1;
-
+                }
+                break;
+            
 case 1:		                                    //Programm pause
         digitalWrite(PauseProgram, HIGH);   
-
+                  Serial.println("Schritt 1");
+                ReleaseReset = false;  
 		iStep = 2;
 
 
 
 case 2:		                                    //Antasten    
+                Serial.println("Schritt 2");
+
                 if(!LimitDown){      
 	
-		 		  moveDown(zDir,zPuls, true);
+		 		  moveDown(zDir,zPuls);
 		
                   break;
                 
@@ -165,11 +175,23 @@ case 2:		                                    //Antasten
 		
 case 3:		                                    //Freifahren
      
+                  Serial.println("Schritt 3");		
+
+		if (iDistRelease >= iReleaseCurrent)	{
 		
-		while(iDistRelease <= iReleaseCurrent)	{
-		
-			iReleaseCurrent = moveUp(zDir,zPuls,ReleaseReset);
+			moveUp(zDir,zPuls);
 			
+                       iReleaseCurrent++;
+
+          //      Serial.println(digitalRead(PinStep));	
+
+                      if (ReleaseReset){
+                       iReleaseCurrent = 0;
+                      }
+
+
+                        Serial.println(iReleaseCurrent);
+
 			break;
 		}
 
@@ -179,6 +201,8 @@ case 3:		                                    //Freifahren
 
 
 case 4:		                                     //Start Lichtbogen
+                  Serial.println("Schritt 4");
+
                 digitalWrite(ArcEnable, HIGH);     
                 
                 if (THCArc){          //continue when Arc is on
@@ -188,9 +212,12 @@ case 4:		                                     //Start Lichtbogen
                 break;
 
 case 5:		                                    //Einstechen
-		   while(! THCUp){
-			
-			 moveDown(zDir,zPuls, true);
+
+                  Serial.println("Schritt 5");
+
+		   if(! THCUp){
+			                                                          //weg einfügen
+			 moveDown(zDir,zPuls);
 			 break;
 			   
 		   }
@@ -200,6 +227,9 @@ case 5:		                                    //Einstechen
 
 
 case 6:                                             //End Programm Pause
+
+                  Serial.println("Schritt 6");
+
                digitalWrite(PauseProgram, LOW);    
 
                iStep = 7;
@@ -207,11 +237,16 @@ case 6:                                             //End Programm Pause
 
 
 case 7:                                             //LOOP moveUp(),moveDown()
-          
-          
+
+//!!!!!Abfrage ArcOn else Pause, Schritt 0?
+
+                  Serial.println("Schritt 7");
+
                if (THCUp){
                  
-                moveUp(zDir,zPuls, true); 
+                moveUp(zDir,zPuls); 
+                
+                  Serial.println("Up");                
                 
                 break;
                 
@@ -219,7 +254,9 @@ case 7:                                             //LOOP moveUp(),moveDown()
                
                else if (THCDown){
                  
-                moveDown(zDir,zPuls, true);
+                moveDown(zDir,zPuls);
+               
+                  Serial.println("Down");    
                
                 break;
                 
@@ -234,47 +271,26 @@ case 7:                                             //LOOP moveUp(),moveDown()
 
 
 
-int moveDown(int PinDir, int PinStep, boolean Reset){			//Funktion Z-Achse senken
+int moveDown(int PinDir, int PinStep){			//Funktion Z-Achse senken
   digitalWrite(PinDir, LOW);
   
-  boolean Step;
   
   delay(1);
 	
-  digitalWrite(PinStep, Step);
-  
-  Step =! Step;
-  
-  int iCount;
-	iCount++;
-	
-  if (Reset){
-    iCount = 0;
-  }
-  
-  return iCount;
+  digitalWrite(PinStep, !digitalRead(PinStep));
+ 
   
 }
 
-int moveUp(int PinDir, int PinStep, boolean Reset){				//Funktion Z-Achse anheben
+int moveUp(int PinDir, int PinStep){				//Funktion Z-Achse anheben
   digitalWrite(PinDir, HIGH);
   
-  boolean Step;
 	
-  delay(1);
+  delay(100);
   
-  digitalWrite(PinStep, Step);
+  digitalWrite(PinStep, !digitalRead(PinStep));
   
-  Step =! Step;
-  
-  int iCount;
-	iCount++;
-  
-  if (Reset){
-    iCount = 0;
-  }
-  
-  return iCount;
+
   
 }
 
