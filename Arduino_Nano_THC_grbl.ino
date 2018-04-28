@@ -166,7 +166,7 @@ case 2:		                                    //Antasten
 case 3:		                                    //Freifahren
      
 		
-		while(iDistRelease <= iReleasaCurrent)	{
+		while(iDistRelease <= iReleaseCurrent)	{
 		
 			iReleaseCurrent = moveUp(zDir,zPuls,ReleaseReset);
 			
@@ -190,7 +190,7 @@ case 4:		                                     //Start Lichtbogen
 case 5:		                                    //Einstechen
 		   while(! THCUp){
 			
-			 moveDown(zDir,zPuls);
+			 moveDown(zDir,zPuls, true);
 			 break;
 			   
 		   }
@@ -211,7 +211,7 @@ case 7:                                             //LOOP moveUp(),moveDown()
           
                if (THCUp){
                  
-                moveUp(zDir,zPuls); 
+                moveUp(zDir,zPuls, true); 
                 
                 break;
                 
@@ -219,7 +219,7 @@ case 7:                                             //LOOP moveUp(),moveDown()
                
                else if (THCDown){
                  
-                moveDown(zDir,zPuls);
+                moveDown(zDir,zPuls, true);
                
                 break;
                 
@@ -245,8 +245,9 @@ int moveDown(int PinDir, int PinStep, boolean Reset){			//Funktion Z-Achse senke
   
   Step =! Step;
   
-  int iCount ++;
-  
+  int iCount;
+	iCount++;
+	
   if (Reset){
     iCount = 0;
   }
@@ -266,7 +267,8 @@ int moveUp(int PinDir, int PinStep, boolean Reset){				//Funktion Z-Achse anhebe
   
   Step =! Step;
   
-  int iCount ++;
+  int iCount;
+	iCount++;
   
   if (Reset){
     iCount = 0;
@@ -278,8 +280,9 @@ int moveUp(int PinDir, int PinStep, boolean Reset){				//Funktion Z-Achse anhebe
 
 
 
-boolean TON(int TimeValueMS, boolean IN){						// Timer
- 
+boolean TON(long TimeValueMS, boolean IN){						// Timer
+  long oldTime;
+  long newTime;
   boolean OUT;
   
 if (IN){
@@ -295,8 +298,8 @@ if (IN){
  
 else {
  
-  int oldTime = millis();
-  int newTime = millis();
+  oldTime = millis();
+  newTime = millis();
   return 0;
 } 
   
