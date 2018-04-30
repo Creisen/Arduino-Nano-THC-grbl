@@ -21,10 +21,10 @@ Variablen:
 */	
 
 	//O:
-        int PauseProgram    = 11;
-		int ArcEnable  = 12;
-		int zDir            = 14;
-		int ProgramResume        = 15;
+    int PauseProgram        = 11;
+		int ArcEnable           = 12;
+		int zDir                = 14;
+		int ProgramResume       = 15;
 
 		
 
@@ -91,14 +91,13 @@ void   loop(){
 
   
 boolean NH				 = !digitalRead(3);
-boolean LimitDown		 = ! digitalRead(4);
+boolean LimitDown		 =  digitalRead(4); // Negation nach Test wieder einfuegen!!!
 boolean IzDir 			 =  digitalRead(5);
 boolean IzPuls			 =  digitalRead(6);
-boolean THCUp			 = ! digitalRead(7);
+boolean THCUp			   = ! digitalRead(7);
 boolean THCDown			 = ! digitalRead(8);
 boolean THCArc			 = ! digitalRead(9);
 boolean SpindleEnable	 =  digitalRead(10);
-
 
 
 
@@ -110,10 +109,9 @@ boolean SpindleEnable	 =  digitalRead(10);
 
 if (NH) {
         
-	//digitalWrite(PauseProgram, HIGH);
-  digitalWrite(ProgramResume, LOW);
 	digitalWrite(ArcEnable, LOW);
 	Serial.println("Not-Halt");
+
 	iStep = 0;
 }
 
@@ -134,30 +132,35 @@ else   {
 	}
 	
 	else if (! SpindleEnable) {
-  
+
+              Serial.println("Pin Durchschaltung");
+    
               if(PIND & (1 << PD5)){      //Signale von grbl Durchschalten;
 
                  PORTC |= (1 << PC0);
-              
+                Serial.println("Eingang 1 true");
               }
     
               else {
-                 PORTC &= (1 << PC0);            
+                 PORTC &= (1 << PC0);
+                Serial.println("Eingang 1 false");            
               }
 
               if(PIND & (1 << PD6)){      //Signale von grbl Durchschalten;
 
                  PORTB |= (1 << PB5);
-              
+                Serial.println("Eingang 2 true");                 
               }
     
               else {
-                 PORTC &= (1 << PB5);            
+                 PORTC &= (1 << PB5);        
+                Serial.println("Eingang 2 false");        
               }
 
+                delay(500);
                 
                 digitalWrite(ArcEnable, LOW);
-          //      digitalWrite(PauseProgram, LOW);
+
                 
 		iStep = 0;
 	}
@@ -169,8 +172,8 @@ switch(iStep){
 //Startsignal dann Schrittkette start, sonst disable move, Plasma aus
 
 case 0:		                                    //Alle ausgänge aus
-                digitalWrite(PauseProgram, LOW);
-                digitalWrite(ProgramResume, LOW);
+                digitalWrite(11, HIGH);
+                digitalWrite(15, HIGH);
 	              digitalWrite(ArcEnable, LOW);       
                 Serial.println("Schritt 0");
                 if (SpindleEnable){
@@ -179,7 +182,8 @@ case 0:		                                    //Alle ausgänge aus
                 break;
             
 case 1:		                                    //Programm pause
-             //   digitalWrite(PauseProgram, HIGH);   
+
+                digitalWrite(11, LOW);   //Pause  
                 Serial.println("Schritt 1");
                 ReleaseReset = false;  
 		            iStep = 2;
@@ -189,7 +193,8 @@ case 1:		                                    //Programm pause
 case 2:		                                    //Antasten    
                 Serial.println("Schritt 2");
 
-          //      digitalWrite(PauseProgram, LOW);                 
+
+                digitalWrite(11, HIGH);   //Pause                 
 
 
                 if(LimitDown){      
@@ -272,9 +277,9 @@ case 6:                                             //End Programm Pause
 
                Serial.println("Schritt 6");
 
-               digitalWrite(ProgramResume, HIGH); 
-  
+               digitalWrite(15, LOW); //Resume
 
+  
                iStep = 7;
 
 
@@ -285,6 +290,7 @@ case 7:                                             //LOOP moveUp(),moveDown()
 
                   Serial.println("Schritt 7");
 
+               digitalWrite(15, HIGH); //Resume
 
 
                if (THCUp){
