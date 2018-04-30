@@ -172,8 +172,8 @@ switch(iStep){
 //Startsignal dann Schrittkette start, sonst disable move, Plasma aus
 
 case 0:		                                    //Alle ausgänge aus
-                digitalWrite(11, HIGH);
-                digitalWrite(15, HIGH);
+                digitalWrite(PauseProgram, HIGH);
+                digitalWrite(ProgramResume, HIGH);
 	              digitalWrite(ArcEnable, LOW);       
                 Serial.println("Schritt 0");
                 if (SpindleEnable){
@@ -183,7 +183,6 @@ case 0:		                                    //Alle ausgänge aus
             
 case 1:		                                    //Programm pause
 
-                digitalWrite(11, LOW);   //Pause  
                 Serial.println("Schritt 1");
                 ReleaseReset = false;  
 		            iStep = 2;
@@ -193,8 +192,9 @@ case 1:		                                    //Programm pause
 case 2:		                                    //Antasten    
                 Serial.println("Schritt 2");
 
+                digitalWrite(PauseProgram, LOW);   //Pause  
 
-                digitalWrite(11, HIGH);   //Pause                 
+             
 
 
                 if(LimitDown){      
@@ -218,7 +218,7 @@ case 2:		                                    //Antasten
 case 3:		                                    //Freifahren
      
                   Serial.println("Schritt 3");		
-
+                digitalWrite(PauseProgram, HIGH);   //Pause  
 		if (iDistRelease >= iReleaseCurrent)	{
 		
                 //Motor bewegen
@@ -277,7 +277,7 @@ case 6:                                             //End Programm Pause
 
                Serial.println("Schritt 6");
 
-               digitalWrite(15, LOW); //Resume
+               digitalWrite(ProgramResume, LOW); //Resume
 
   
                iStep = 7;
@@ -290,7 +290,7 @@ case 7:                                             //LOOP moveUp(),moveDown()
 
                   Serial.println("Schritt 7");
 
-               digitalWrite(15, HIGH); //Resume
+               digitalWrite(ProgramResume, HIGH); //Resume
 
 
                if (THCUp){
