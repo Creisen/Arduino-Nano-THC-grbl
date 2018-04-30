@@ -30,16 +30,14 @@ Variablen:
 
 	//_Var:
 
-		int icountSteps = 0;
 		int iStep = 0;
-		int iVelo = 0;	//mm/min
+		int iVelo = 100;	//mm/min
 		int iDistRelease = 10;	//mm Freifahren
-    int iDistPlunge = 10;    //mm Einstechtiefe
+    //int iDistPlunge = 10;    //mm Einstechtiefe
 		int StepsPermm = 100;	// Schrittweite
-    int iReleaseCurrent = 0;
-		boolean ReleaseReset = 0;
+    //int iReleaseCurrent = 0;
 		int iReleasePlunge = 0;
-		boolean PlungeReset;
+    boolean ReleaseReset = 1;
 		
 
 
@@ -49,7 +47,7 @@ void setup(){
 
     Serial.begin(9600);
 
-   motor.setSpeed(50); //50 rpm
+    motor.setSpeed(iVelo); 
 
   
 	  pinMode(3, INPUT);
@@ -76,7 +74,7 @@ void setup(){
 	  pinMode(ProgramResume, OUTPUT);
 
 	  iDistRelease = iDistRelease * StepsPermm;
-	  iDistPlunge = iDistPlunge * StepsPermm;
+	 // iDistPlunge = iDistPlunge * StepsPermm;
 	
 	
 }
@@ -133,36 +131,48 @@ else   {
 	
 	else if (! SpindleEnable) {
 
-              Serial.println("Pin Durchschaltung");
+              digitalWrite(ArcEnable, LOW);
+
+
+              if(ReleaseReset){
+
+                Serial.println("Initiales Freifahren");   
+
+                digitalWrite(PauseProgram, LOW);   //Pause  
+
+                digitalWrite(zDir, LOW);
+                motor.step(iDistRelease, FORWARD, MICROSTEP); 
+
+                digitalWrite(ProgramResume, LOW); //Resume
+                ReleaseReset = 0;
+                
+              }
+
+
+         /*     Serial.println("Pin Durchschaltung");
+
     
               if(PIND & (1 << PD5)){      //Signale von grbl Durchschalten;
 
                  PORTC |= (1 << PC0);
-                Serial.println("Eingang 1 true");
               }
     
               else {
-                 PORTC &= (1 << PC0);
-                Serial.println("Eingang 1 false");            
+                 PORTC &= ~(1 << PC0);            
               }
 
               if(PIND & (1 << PD6)){      //Signale von grbl Durchschalten;
 
-                 PORTB |= (1 << PB5);
-                Serial.println("Eingang 2 true");                 
+                 PORTB |= (1 << PB5);                 
               }
     
               else {
-                 PORTC &= (1 << PB5);        
-                Serial.println("Eingang 2 false");        
+                 PORTB &= ~(1 << PB5);               
               }
-
-                delay(500);
+         */
+             
                 
-                digitalWrite(ArcEnable, LOW);
-
-                
-		iStep = 0;
+	          	iStep = 0;
 	}
 
 
@@ -184,7 +194,7 @@ case 0:		                                    //Alle ausgänge aus
 case 1:		                                    //Programm pause
 
                 Serial.println("Schritt 1");
-                ReleaseReset = false;  
+                ReleaseReset = true;  
 		            iStep = 2;
 
 
@@ -201,7 +211,7 @@ case 2:		                                    //Antasten
 	                                            //Spindel ab
                   digitalWrite(zDir, HIGH);
                   
-                  motor.step(100, BACKWARD, INTERLEAVE); 
+                  motor.step(1, BACKWARD, MICROSTEP); 
 		
                   break;
                 
@@ -209,7 +219,6 @@ case 2:		                                    //Antasten
 
 
 		else {
-				  ReleaseReset = false;
                   iStep = 3;
               
                 }
@@ -217,35 +226,35 @@ case 2:		                                    //Antasten
 		
 case 3:		                                    //Freifahren
      
-                  Serial.println("Schritt 3");		
+                Serial.println("Schritt 3");		
                 digitalWrite(PauseProgram, HIGH);   //Pause  
-		if (iDistRelease >= iReleaseCurrent)	{
+		//if (iDistRelease >= iReleaseCurrent)	{
 		
                 //Motor bewegen
-          digitalWrite(zDir, LOW);
-          motor.step(1, FORWARD, INTERLEAVE); 
+                digitalWrite(zDir, LOW);
+                motor.step(iDistRelease, FORWARD, MICROSTEP); 
 			
-                       iReleaseCurrent++;
+   //                    iReleaseCurrent++;
 
           //      Serial.println(digitalRead(PinStep));	
 
-                      if (ReleaseReset){
-                       iReleaseCurrent = 0;
-                      }
+    //                  if (ReleaseReset){
+    //                  iReleaseCurrent = 0;
+    //                  }
 
 
-                        Serial.println(iReleaseCurrent);
+      //                  Serial.println(iReleaseCurrent);
 
-			break;
-		}
+		//	break;
+		//}
 
-		ReleaseReset = true;
-		iStep = 4;
+	   //	ReleaseReset = true;
+		            iStep = 4;
 		
 
 
 case 4:		                                     //Start Lichtbogen
-                  Serial.println("Schritt 4");
+                Serial.println("Schritt 4");
 
                 digitalWrite(ArcEnable, HIGH);     
                 
@@ -263,7 +272,7 @@ case 5:		                                    //Einstechen
 			                                                          
           digitalWrite(zDir, HIGH);
                   
-          motor.step(100, BACKWARD, INTERLEAVE); 
+          motor.step(100, BACKWARD, MICROSTEP); 
 
 			 break;
 			   
@@ -278,7 +287,6 @@ case 6:                                             //End Programm Pause
                Serial.println("Schritt 6");
 
                digitalWrite(ProgramResume, LOW); //Resume
-
   
                iStep = 7;
 
@@ -297,7 +305,7 @@ case 7:                                             //LOOP moveUp(),moveDown()
                  
                   digitalWrite(zDir, LOW);
                   
-                  motor.step(100, BACKWARD, INTERLEAVE); 
+                  motor.step(1, BACKWARD, MICROSTEP); 
                 
                   Serial.println("Up");                
                 
@@ -309,7 +317,7 @@ case 7:                                             //LOOP moveUp(),moveDown()
                  
                   digitalWrite(zDir, HIGH);
                   
-                  motor.step(100, BACKWARD, INTERLEAVE); 
+                  motor.step(1, BACKWARD, MICROSTEP); 
                
                   Serial.println("Down");    
                
