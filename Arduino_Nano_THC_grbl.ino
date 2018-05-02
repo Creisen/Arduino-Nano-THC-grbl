@@ -32,7 +32,7 @@ Variablen:
 
 		int iStep = 0;
 		int iVelo = 100;	//mm/min
-		int iDistRelease = 10;	//mm Freifahren
+		int iDistRelease = 20;	//mm Freifahren
     //int iDistPlunge = 10;    //mm Einstechtiefe
 		int StepsPermm = 100;	// Schrittweite
     //int iReleaseCurrent = 0;
@@ -89,7 +89,7 @@ void   loop(){
 
   
 boolean NH				 = !digitalRead(3);
-boolean LimitDown		 =  digitalRead(4); // Negation nach Test wieder einfuegen!!!
+boolean LimitDown		 = ! digitalRead(4); // Negation nach Test wieder einfuegen!!!
 boolean IzDir 			 =  digitalRead(5);
 boolean IzPuls			 =  digitalRead(6);
 boolean THCUp			   = ! digitalRead(7);
@@ -141,7 +141,7 @@ else   {
                 digitalWrite(PauseProgram, LOW);   //Pause  
 
                 digitalWrite(zDir, LOW);
-                motor.step(iDistRelease, FORWARD, MICROSTEP); 
+                motor.step(iDistRelease, FORWARD, SINGLE); 
 
                 digitalWrite(ProgramResume, LOW); //Resume
                 ReleaseReset = 0;
@@ -211,7 +211,7 @@ case 2:		                                    //Antasten
 	                                            //Spindel ab
                   digitalWrite(zDir, HIGH);
                   
-                  motor.step(1, BACKWARD, MICROSTEP); 
+                  motor.step(1, BACKWARD, SINGLE); 
 		
                   break;
                 
@@ -232,7 +232,7 @@ case 3:		                                    //Freifahren
 		
                 //Motor bewegen
                 digitalWrite(zDir, LOW);
-                motor.step(iDistRelease, FORWARD, MICROSTEP); 
+                motor.step(iDistRelease, FORWARD, SINGLE); 
 			
    //                    iReleaseCurrent++;
 
@@ -272,7 +272,7 @@ case 5:		                                    //Einstechen
 			                                                          
           digitalWrite(zDir, HIGH);
                   
-          motor.step(100, BACKWARD, MICROSTEP); 
+          motor.step(100, BACKWARD, SINGLE); 
 
 			 break;
 			   
@@ -305,7 +305,7 @@ case 7:                                             //LOOP moveUp(),moveDown()
                  
                   digitalWrite(zDir, LOW);
                   
-                  motor.step(1, BACKWARD, MICROSTEP); 
+                  motor.step(1, BACKWARD, SINGLE); 
                 
                   Serial.println("Up");                
                 
@@ -317,7 +317,7 @@ case 7:                                             //LOOP moveUp(),moveDown()
                  
                   digitalWrite(zDir, HIGH);
                   
-                  motor.step(1, BACKWARD, MICROSTEP); 
+                  motor.step(1, BACKWARD, SINGLE); 
                
                   Serial.println("Down");    
                
