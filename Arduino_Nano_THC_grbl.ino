@@ -31,8 +31,8 @@ Variablen:
 	//_Var:
 
 		int iStep = 0;
-		int iVelo = 100;	//mm/min
-		int iDistRelease = 20;	//mm Freifahren
+		int iVelo = 300;	//mm/min
+		int iDistRelease = 14;	//mm Freifahren
     //int iDistPlunge = 10;    //mm Einstechtiefe
 		int StepsPermm = 100;	// Schrittweite
     //int iReleaseCurrent = 0;
@@ -90,12 +90,12 @@ void   loop(){
   
 boolean NH				 = !digitalRead(3);
 boolean LimitDown		 = ! digitalRead(4); // Negation nach Test wieder einfuegen!!!
-boolean IzDir 			 =  digitalRead(5);
-boolean IzPuls			 =  digitalRead(6);
-boolean THCUp			   = ! digitalRead(7);
-boolean THCDown			 = ! digitalRead(8);
+//boolean IzDir 			 =  digitalRead(5);
+//boolean IzPuls			 =  digitalRead(6);
+boolean THCUp			   = ! digitalRead(8);
+boolean THCDown			 = ! digitalRead(7);
 boolean THCArc			 = ! digitalRead(9);
-boolean SpindleEnable	 =  digitalRead(10);
+boolean SpindleEnable	 =  digitalRead(5);
 
 
 
@@ -141,7 +141,7 @@ else   {
                 digitalWrite(PauseProgram, LOW);   //Pause  
 
                 digitalWrite(zDir, LOW);
-                motor.step(iDistRelease, FORWARD, SINGLE); 
+                motor.step(2000, FORWARD, SINGLE); 
 
                 digitalWrite(ProgramResume, LOW); //Resume
                 ReleaseReset = 0;
@@ -211,7 +211,7 @@ case 2:		                                    //Antasten
 	                                            //Spindel ab
                   digitalWrite(zDir, HIGH);
                   
-                  motor.step(1, BACKWARD, SINGLE); 
+                  motor.step(25, BACKWARD, SINGLE); 
 		
                   break;
                 
@@ -268,16 +268,16 @@ case 5:		                                    //Einstechen
 
                   Serial.println("Schritt 5");
 
-		   if(! THCUp){
+	//	   if(! THCUp){
 			                                                          
           digitalWrite(zDir, HIGH);
                   
-          motor.step(100, BACKWARD, SINGLE); 
+          motor.step(20, BACKWARD, SINGLE); 
 
-			 break;
+	//		 break;
 			   
-		   }
-		
+	//	   }
+      
 			iStep = 6;
 		
 
@@ -287,6 +287,8 @@ case 6:                                             //End Programm Pause
                Serial.println("Schritt 6");
 
                digitalWrite(ProgramResume, LOW); //Resume
+
+              delay(1000);    //pause bis auswertung
   
                iStep = 7;
 
@@ -305,7 +307,7 @@ case 7:                                             //LOOP moveUp(),moveDown()
                  
                   digitalWrite(zDir, LOW);
                   
-                  motor.step(1, BACKWARD, SINGLE); 
+                  motor.step(2, BACKWARD, SINGLE); 
                 
                   Serial.println("Up");                
                 
@@ -317,7 +319,7 @@ case 7:                                             //LOOP moveUp(),moveDown()
                  
                   digitalWrite(zDir, HIGH);
                   
-                  motor.step(1, BACKWARD, SINGLE); 
+                  motor.step(2, BACKWARD, SINGLE); 
                
                   Serial.println("Down");    
                
